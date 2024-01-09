@@ -1,0 +1,220 @@
+#+title: Excel
+#+startup: show2levels
+
+* Table of Content :TOC:
+- [[#excel-basic][Excel Basic]]
+  - [[#basic-calculations][Basic Calculations]]
+  - [[#cell-references][Cell References]]
+- [[#functions][Functions]]
+  - [[#sum-max-min-and-average][~SUM~, ~MAX~, ~MIN~ and ~AVERAGE~]]
+  - [[#count-and-counta][~COUNT~ and ~COUNTA~]]
+- [[#conditional][Conditional]]
+  - [[#if-and-nested-if][~IF~ and Nested ~IF~]]
+  - [[#functions-combined-with-if][Functions Combined with ~IF~]]
+  - [[#and-and-or][~AND~ and ~OR~]]
+  - [[#isblank][~ISBLANK~]]
+- [[#lookup][Lookup]]
+  - [[#vlookup][~VLOOKUP~]]
+  - [[#hlookup][~HLOOKUP~]]
+  - [[#xlookup][~XLOOKUP~]]
+- [[#footnotes][Footnotes]]
+
+* Excel Basic
+** Basic Calculations
+In order to start a calculation in a cell, We will type the ~=~ sign and
+then type our calculation.
+
+** Cell References
+If we type the ~=~ sign, followed by a reference to some cells (either by
+typing the cell name or clicking it), we can reference the data stored in
+that cell.
+
+Sometimes, we would like that a certain reference will not move if we reuse
+the formula in other cells.
+
+In such cases, we can use an *absolute reference*, by hitting the F4 buttom
+(or manually typing the ~$~ signs before the column and/or row) after typing
+the cell reference.
+
+In certain cases, we might prefer using a *partial reference* rather than an
+*absolute reference*. There are three different types of partial reference:
+
+- ~$A$1~ :: fix column ~A~ and row ~1~
+- ~$A1~ :: fix column ~A~, can be changed to ~A2~, ~A3~, etc.
+- ~A$1~ :: fix row ~1~, can be changed to ~B1~, ~C1~, etc.
+
+*Note*: In the rest of this file, we use ~RANGE~ to replace the following two types of references:
+
+#+begin_example
+value1, value2, value3, ...
+#OR
+value1: value2
+#+end_example
+
+* Functions
+** ~SUM~, ~MAX~, ~MIN~ and ~AVERAGE~
+The syntax of the ~SUM~ function is
+
+#+begin_quote
+=SUM(RANGE)
+#+end_quote
+
+Likewisely, the syntax of ~MAX~, ~MIN~ and ~AVERAGE~ are
+
+#+begin_quote
+=MAX(RANGE)
+=MIN(RANGE)
+=AVERAGE(RANGE)
+#+end_quote
+
+** ~COUNT~ and ~COUNTA~
+With ~COUNTA~ you can count all items in a range with ~COUNTA~, the `A` stands
+for "All", which means all the non-NA values. The syntax of ~COUNTA~ is
+
+#+begin_quote
+=COUNTA(RANGE)
+#+end_quote
+
+On the contrary, the function ~COUNT~ only counts the numeric items in a given
+range. The syntax is
+
+#+begin_quote
+=COUNT(RANGE)
+#+end_quote
+
+* Conditional
+** ~IF~ and Nested ~IF~ :IMPROTANT:
+The syntax of the ~IF~ function is
+
+#+begin_quote
+=IF(logical_test, [value_if_true], [value_if_false])
+#+end_quote
+
+We can check conditions using various operations, such as
+
+| Operator | Description      |
+|----------+------------------|
+| ~=~      | equals to        |
+| ~>~      | greater than     |
+| ~<~      | smaller than     |
+| ~<>~     | different        |
+| ~>=~     | not smaller than |
+| ~<=~     | not greater than |
+
+Nested ~IF~ is a combination of more than one ~IF~ function which can help
+us check multiple conditions. There are two basic nested ~IF~
+
+#+begin_quote
+=IF(logical_test1, value_if_true1, IF(logical_test2, value_if_true2, value_if_false_2))
+=IF(logical_test1, IF(logical_test2, value_if_true2, value_if_false_2), value_if_false_1)
+#+end_quote
+
+*Note*: You can nest ~IF~ into any ~value_if~ like arguments.
+
+** Functions Combined with ~IF~
+There are many functions combined with ~IF~, they only manipulate on data
+which satisfy the given conditions.
+
+#+begin_quote
+=SUMIF(RANGE, criteria, [sum_range])
+=COUNTIF(RANGE, criteria)
+=AVERAGEIF(RANGE, criteria, [average_range])
+
+=SUMIFS(sum_range, RANGE1, criteria1, [RANGE2, criteria2,] ...)
+=COUNTIFS(count_range, RANGE1, criteria1, [RANGE2, criteria2,] ...)
+=MAXIFS(max_range, RANGE1, criteria1, [RANGE2, criteria2,] ...)
+=MINIFS(min_range, RANGE1, criteria1, [RANGE2, criteria2,] ...)
+#+end_quote
+
+*Note*: The operators like ~>~ and ~=~ used in criteria must be surrounded
+by quotation marks ~""~.
+
+** ~AND~ and ~OR~ :IMPROTANT:
+~AND~ will return ~TRUE~ if and only if all the arguments return ~TRUE~.
+~OR~ will return ~FALSE~ if and only if all the arguments return ~FALSE~.
+
+Here are their syntax:
+
+#+begin_quote
+=AND(logical1, [logical2,] ...)
+=OR(logical1, [logical2,] ...)
+#+end_quote
+
+** ~ISBLANK~
+~ISBLANK~ function checks if a cell is empty. It returns ~TRUE~ if it's
+blank, otherwise, it returns ~FALSE~
+
+The ~ISBLANK~ function is usually combined with an ~IF~ function, in order
+to check if a certain cell is blank, and perform a different calculation
+accordingly.
+
+The syntax of ~ISBLANK~ is simple:
+#+begin_quote
+=ISBLANK(VALUE)
+#+end_quote
+
+* Lookup
+** ~VLOOKUP~
+~VLOOKUP~ helps us lookup a value vertically in table, and return a
+corresponding value. The syntax is
+
+#+begin_quote
+=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])
+#+end_quote
+| Argument         | Description                                      |
+|------------------+--------------------------------------------------|
+| ~lookup_value~   | The value we are looking for                     |
+| ~table_array~    | The range in which we will lookup[fn:1]          |
+| ~col_index_num~  | Column number from which return the result[fn:2] |
+| ~[range_lookup]~ | Range lookup method[fn:3]                        |
+
+** ~HLOOKUP~
+Similarly, ~HLOOKUP~ help us lookup a value horizontally in table. The syntax
+is
+
+#+begin_quote
+=HLOOKUP(lookup_value, table_array, row_index_num, [range_lookup])
+#+end_quote
+
+It's arguments is corresponding to the ~VLOOKUP~'s.
+
+** ~XLOOKUP~
+~XLOOKUP~ is a more powerful method than ~VLOOKUP~ and ~HLOOKUP~, the syntax
+is
+
+#+begin_quote
+=XLOOKUP(lookup_value, lookup_array, return_array, [if_not_found], [match_mode], [search_mode])
+#+end_quote`
+
+Here are some different arguments from ~VLOOKUP~ and ~HLOOKUP~
+
+| Argument       | Description                                                   |
+|----------------+---------------------------------------------------------------|
+| ~lookup_array~ | The array in which we should lookup our value                 |
+| ~return_array~ | The array in which the corresponding value should be returned |
+| ~if_not_found~ | What to return in case the value is not found[fn:4]           |
+| ~match_mode~   | The method to match the value[fn:5]                           |
+| ~search_mode~  | Which search mode should be used[fn:6]                        |
+
+* Footnotes
+
+[fn:1] The range must start from the column which contains the value, and should
+contain the column in which we have our result.
+
+[fn:2] The number should be relative to the first column in the selected range
+in ~table_array~.
+
+[fn:3] ~0~ or ~FALSE~ is the default method, i.e. *exact match*, we use this method on most
+cases. On the contrary, ~1~ or ~TRUE~ stand for "Approximate match".
+
+[fn:4] This value can be a ~constant~, ~cell reference~ or even ~function~
+
+[fn:5] ~0~: Exact match (default);
+~-1~: return the next smallest item;
+~1~: return the next greatest item;
+~2~: Wildcard match.
+
+[fn:6] ~1~: Search the array from first to last (default);
+~-1~: Search from last to first;
+~2~: Binary search in ascending order;
+~-2~ Binary search in decending order.

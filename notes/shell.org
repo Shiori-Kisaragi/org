@@ -1,0 +1,335 @@
+#+title: Shell
+#+startup: show2levels
+* Table of Content :TOC:
+- [[#get-mannual-for-a-command-in-shell][Get Mannual for a Command in Shell]]
+- [[#shell-scripting][Shell Scripting]]
+  - [[#variables-and-string][Variables and String]]
+  - [[#functions][Functions]]
+  - [[#exit-codes][Exit Codes]]
+  - [[#command-substitution][Command Substitution]]
+  - [[#wildcards-and-curly-braces][Wildcards and Curly Braces]]
+- [[#shell-process-control][Shell Process Control]]
+  - [[#killing-a-process][Killing a Process]]
+  - [[#pausing-and-backgrouding-processes][Pausing and Backgrouding Processes]]
+- [[#shell-streams][Shell Streams]]
+  - [[#basic][Basic]]
+  - [[#pipes][Pipes]]
+- [[#useful-commands][Useful Commands]]
+  - [[#unzip-targz-files][Unzip ~.tar.gz~ Files]]
+  - [[#download-from-url][Download from URL]]
+
+* Get Mannual for a Command in Shell
+Command:
+#+begin_src shell
+man pwd
+#+end_src
+
+#+RESULTS:
+#+begin_example
+PWD(1)                           User Commands                          PWD(1)
+
+NAME
+       pwd - print name of current/working directory
+
+SYNOPSIS
+       pwd [OPTION]...
+
+DESCRIPTION
+       Print the full filename of the current working directory.
+
+       -L, --logical
+              use PWD from environment, even if it contains symlinks
+
+       -P, --physical
+              avoid all symlinks
+
+       --help display this help and exit
+
+       --version
+              output version information and exit
+
+       If no option is specified, -P is assumed.
+
+       NOTE:  your shell may have its own version of pwd, which usually super‐
+       sedes the version described here.  Please refer to your  shell's  docu‐
+       mentation for details about the options it supports.
+
+AUTHOR
+       Written by Jim Meyering.
+
+REPORTING BUGS
+       GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
+       Report any translation bugs to <https://translationproject.org/team/>
+
+COPYRIGHT
+       Copyright  ©  2020  Free Software Foundation, Inc.  License GPLv3+: GNU
+       GPL version 3 or later <https://gnu.org/licenses/gpl.html>.
+       This is free software: you are free  to  change  and  redistribute  it.
+       There is NO WARRANTY, to the extent permitted by law.
+
+SEE ALSO
+       getcwd(3)
+
+       Full documentation <https://www.gnu.org/software/coreutils/pwd>
+       or available locally via: info '(coreutils) pwd invocation'
+
+GNU coreutils 8.32               February 2022                          PWD(1)
+#+end_example
+
+* Shell Scripting
+** Variables and String
+To assign variables in bash, use the syntax ~foo=bar~ instead of ~foo = bar~.
+#+begin_src shell
+foo=bar
+echo "$foo"
+echo '$foo'
+#+end_src
+
+#+RESULTS:
+: bar
+: $foo
+
+Strings in bash can be defined with ~'~ and ~"~ delimiters, but they are not
+equivalent. Strings delimited with ~'~ are literal strings and will not substitute
+variables values whereas ~"~ delimited strings will.
+** Functions
+To define a function in bash
+
+#+begin_src shell
+mcd () {
+    mkdir -p "$1"
+    cd "$1"
+}
+#+end_src
+
+Note that in bash there is no parameter, to get arguments passed to a function,
+we use:
+
+- ~$0~ :: Name of the script
+- ~$1~ to ~$9~ :: Arguments to the script. ~$1~ is the first and so on.
+- ~$@~ :: All the arguments
+- ~$#~ :: Number of arguments
+
+There are also other variables refering to arguments. A more comprehensive
+list can be found [[https://tldp.org/LDP/abs/html/special-chars.html][here]]
+** Exit Codes
+Commands will often return output and errors. A value of 0 usually means
+everything went OK; anything different from 0 means an error occurred.
+
+Exit codes can be used to conditionally execute commands using ~&&~ and
+~||~, both of which are *short-circuiting* operators. Commands can also be
+separated within the same line using a semicolon ~;~
+
+#+begin_src shell
+false || echo "Oops, fail"
+true || echo "Will not be printed"
+true && echo "Things went well"
+false && echo "Will not be printed"
+#+end_src
+
+#+RESULTS:
+: Oops, fail
+: Things went well
+
+** Command Substitution
+Another common pattern is wanting to get the output of a command as a
+variable. Whenever you place ~$(CMD)~ it will execute ~CMD~ and get the
+output of the command and substitute it in place. For example
+
+#+begin_src shell
+for file in $(ls); do
+    echo "$file"
+done
+#+end_src
+
+#+RESULTS:
+: Missing-Semester.org
+: another.txt
+: hello.txt
+
+There is another feature called *process substitution*, we use it when we
+need to pipe the ~stdout~ of /multiple/ commands.
+
+#+begin_src shell
+diff <(ls -a) <(ls)
+#+end_src
+
+#+RESULTS:
+: 1,2d0
+: < .
+: < ..
+** Wildcards and Curly Braces
+Whenever you want to perform some sort of wildcard matching, you can use
+~?~ and ~*~ to match /one/ or /any amount of/ characters respectively.
+
+Whenever you have a common substring in a series of commands, you can use
+curly braces for bash to expand this automatically.
+
+#+begin_src shell
+mkdir foo bar
+touch {foo,bar}/{a..h} # a..h means a, b, c, ..., h
+touch foo/x bar/y
+diff <(ls foo) <(ls bar)
+#+end_src
+
+* Shell Process Control
+** Killing a Process
+In UNIX, when typing ~Ctrl-C~ this prompts the shell to deliver a ~SIGINT~
+signal to the proces.
+
+Here is an example of a Python program that captures ~SIGINT~ and ignores
+it, no longer stopping.
+
+#+begin_src python :tangle sigint_test.py
+#!/home/shiori/anaconda3/bin/python
+import signal, time
+
+
+def handler(signum, time):
+    print("\nI got a SIGINT, but I am not stopping")
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, handler)
+    i = 1
+    while True:
+        time.sleep(.1)
+        print("\r{}".format(i), end="")
+        i += 1
+#+end_src
+
+Run it in shell, and type ~Ctrl-C~. This program will never stop until sending
+~SIGQUIT~ signal to it, i.e., type ~Ctrl-\~ instead.
+
+While ~SIGINT~ and ~SIGQUIT~ are both usually associated with terminal related
+requests, a more generic signal for asking a process to exit gracefully is
+the ~SIGTERM~ signal. To send this signal we can use the ~kill~ command, with
+the syntax ~kill -TERM <PID>~.
+
+** Pausing and Backgrouding Processes
+~SIGSTOP~ pauses a process. In the terminal, typing ~Ctrl-Z~ will prompt
+the shell to send a ~SIGTSTP~ signal, short for Terminal Stop (the terminal's
+version of ~SIGSTOP~).
+
+We can then continue the paused job in the foreground or in the background
+using ~fg~ or ~bg~, respectively.
+
+The ~jobs~ command lists the unfinished jobs associated with the currentj
+terminal session. You can refer to those jobs using their pid (you can use
+~pgrep~ to find that out). More intuitively, you can also refer to a process
+using the percent symbol followed by its own job number (displayed by ~job~).
+To refer to the last background job you can use the ~$!~ special parameter.
+
+We can specify certain job using the ID showed by ~jobs~:
+
+#+begin_example
+$ jobs
+[1] + running emacs
+$ fg %1
+#+end_example
+
+In this example, the job ~emacs~ will be set to run in the foreground.
+
+One more thing to know is that the ~&~ suffix in a command will run the
+command in the background, giving you the prompt back. Although it will
+still use the shell's ~STDOUT~ which can be annoying (use shell redirections
+in that case).
+
+Note that backgrouded processes are still children processes of your terminal
+and will die if you close the terminal (this will send yet another signal,
+~SIGHUP~). To prevent that from happening you can run the program with
+~nohup~, or use ~disown~ if the process has already been started.+title: Shell
+
+* Shell Streams
+** Basic
+The simplest redirection of streams: ~> file~ and ~< file~
+#+begin_src shell
+echo "Hello World!" > hello.txt
+cat < hello.txt
+#+end_src
+
+#+RESULTS:
+: Hello World!
+
+To copy a file into another:
+#+begin_src shell
+cat < hello.txt > another.txt
+cat < another.txt
+#+end_src
+
+#+RESULTS:
+: Hello World!
+
+To append something to a file:
+#+begin_src shell
+echo "This is a message" > hello.txt
+cat hello.txt
+echo "-------------------------------"
+echo "This is another message: Hello!" >> hello.txt
+cat hello.txt
+#+end_src
+
+#+RESULTS:
+: This is a message
+: -------------------------------
+: This is a message
+: This is another message: Hello!
+
+This means, ~> file~ *overwrites* a file while ~>> file~~ *appends* new
+content to a file.
+** Pipes
+The ~|~ operator let us "chain" programs such that the output of one is the
+input of another:
+
+#+begin_src shell
+ls -l / | tail -n1
+echo "-------------------------"
+ls -l / | tail -n2
+#+end_src
+
+#+RESULTS:
+: drwxr-xr-x  13 root root    4096 May  2 05:35 var
+: -------------------------
+: drwxr-xr-x  14 root root    4096 May  2 05:34 usr
+: drwxr-xr-x  13 root root    4096 May  2 05:35 var
+
+* Useful Commands
+** Unzip ~.tar.gz~ Files
+#+begin_src shell
+tar -xvzf filename.tar.gz -C some_custom_folder_name
+#+end_src
+- f :: this must be the last flag of the command, and the tar file must
+  be immediately after. It tells tar the name and path of the compressed
+  file;
+- z :: tells tar to decompress the archive using *gzip*;
+- x :: tar can collect files or extract them. x does the latter;
+- v :: makes tar talk a lot. *Verbose* output shows you all the files
+  being extracted;
+- C :: extract into a custom folder.
+** Download from URL
+*** Wget Version
+#+begin_src shell
+# Download to current path
+wget your.url
+# Download to specified path
+wget your.url -O your/path
+#+end_src
+
+*** Curl Version
+#+begin_src shell
+curl your.url -o your/path
+#+end_src
+
+*** Use Bash Script
+#+begin_src bash
+#!/bin/bash
+while read url; do
+    wget $url
+done < urls.txt
+#+end_src
+
+And inside of ~urls.txt~, put your list of files:
+#+begin_src
+your.url1
+your.url2
+your.url3
+#+end_src

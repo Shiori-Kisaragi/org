@@ -1,0 +1,668 @@
+#+title: SQL
+#+startup: show2levels
+* Table of Content :TOC:
+- [[#install-mysql][Install MySQL]]
+  - [[#on-ubuntu][On Ubuntu]]
+- [[#basic-terminal-commands][Basic Terminal Commands]]
+- [[#structured-query-language-sql][Structured Query Language (SQL)]]
+  - [[#basic][Basic]]
+  - [[#data-types][Data Types]]
+- [[#data-definition-language][Data Definition Language]]
+  - [[#create][~CREATE~]]
+  - [[#alter][~ALTER~]]
+  - [[#drop][~DROP~]]
+  - [[#rename][~RENAME~]]
+  - [[#truncate][~TRUNCATE~]]
+  - [[#other-useful-commands][Other Useful Commands]]
+- [[#data-manipulation-language][Data Manipulation Language]]
+  - [[#insert][~INSERT~]]
+  - [[#delect][~DELECT~]]
+  - [[#update][~UPDATE~]]
+  - [[#select][~SELECT~]]
+- [[#data-control-language][Data Control Language]]
+- [[#footnotes][Footnotes]]
+
+* Install MySQL
+** On Ubuntu
+Install MySQL server on Ubuntu
+
+#+begin_src shell
+sudo apt install -y mysql-server
+#+end_src
+
+Enter MySQL server  without user's password set
+
+#+begin_src shell
+sudo mysql -uroot
+#+end_src
+
+Update user's password
+
+#+begin_src shell
+alter user "root"@"localhost"
+identified with mysql_native_password
+by "your_new_password";
+#+end_src
+
+Then enter MySQL server by new password
+
+#+begin_src shell
+mysql -u root -p
+#+end_src
+
+If you use WSL, you can connect to MySQL server in Windows system. First,
+change ~bind-address~ in file ~/etc/mysql/mysql.conf.d/mysqld.cnf~
+
+#+begin_src
+bind-address = 0.0.0.0
+#+end_src
+
+and then restart MySQL server.
+
+* Basic Terminal Commands
+Start MySQL server:
+
+#+begin_src shell
+sudo service mysql start
+#+end_src
+
+Check if MySQL server is started
+
+#+begin_src shell
+sudo service mysql status
+#+end_src
+
+Stop MySQL server
+
+#+begin_src shell
+sudo service mysql stop
+#+end_src
+
+Restart MySQL server
+
+#+begin_src shell
+sudo service mysql restart
+#+end_src
+
+* Structured Query Language (SQL)
+** Basic
+1. All sentences are end with =;=, break long sentences into multi lines to
+increase the readabilities.
+1. SQL is not case-sensitive, up-casing all keyword is recommend.
+2. Comments:
+   - Single line comments: =-- Comments= or =# Comments=;
+   - Multi line comments: =/* Comments */=.
+** Data Types
+*** Numeric
+
+| Type      | Storage (byte) |
+|-----------+----------------|
+| TINYINT   |              1 |
+| SMALLINT  |              2 |
+| MEDIUMINT |              3 |
+| INT       |              4 |
+| BIGINT    |              8 |
+| FLOAT     |              4 |
+| DOUBLE    |              8 |
+| DECIMAL[fn:1] | ~              |
+
+*Note*: Declare a non-negative number, such as non-negative int:
+=INT UNSIGNED=
+
+*** String
+
+| Type     | Storage (byte) | Description |
+|----------+----------------+-------------|
+| CHAR     |          0-255 |             |
+| VARCHAR  |        0-65535 |             |
+| TINYBLOB |          0-255 | Binary      |
+| TINYTEXT |          0-255 |             |
+
+*Note*:
+1. There are also normal, medium and long versions of blob and text.
+2. There must be a parameter after string types' declarations to limit the
+   max lengths of them, such as =char(10)= and =varchar(50)=.
+*** Date and Time
+
+| Type            | Storage | Format              |
+|-----------------+---------+---------------------|
+| DATE            |       3 | YYYY-MM-DD          |
+| TIME            |       3 | HH:MM:SS            |
+| YEAR            |       1 | YYYY                |
+| DATETIME        |       8 | YYYY-MM-DD HH:MM:SS |
+| TIMESTAMP[fn:2] |       4 | YYYY-MM-DD HH:MM:SS |
+
+* Data Definition Language
+Some DDL Commands:
+** ~CREATE~
+The following statement demand SQL to create a new table with specified columns.
+
+#+begin_src sql
+CREATE TABLE tb_name
+(
+    col1 value_type1 NOT NULL,
+    col2 value_type2 NULL,
+    col2 value_type2 NULL DEFAULT default_value
+);
+#+end_src
+
+The field ~value_type~ specifies the type of value, here are some types
+
+| Type               | Oracle       | MySQL     |
+|--------------------+--------------+-----------|
+| Fixed char list    | ~CHAR(n)~    | ~CHAR(n)~ |
+| Variable char list | ~VARCHAR(n)~ | ~text(n)~ |
+
+The field ~NOT NULL~ or ~NULL~ specifies whether the column can be ~NULL~ or
+not, and the field ~DEFAULT default_value~ specifies the default value of the
+column.
+** ~ALTER~
+In ideal situation, we'll never use ~ALTER~ statements to alter the stucture
+of a table. We should fully consider future needs in the design process of
+a table.
+
+*** Add Column
+#+begin_src sql
+ALTER TABLE tb_name
+ADD col_name value_type;
+#+end_src
+
+*** Drop Column
+#+begin_src sql
+ALTER TABLE tb_name
+DROP COLUMN col_name;
+#+end_src
+** ~DROP~
+#+begin_src sql
+DROP TABLE tb_name;
+#+end_src
+
+** ~RENAME~
+In /Oracle/ and /MySQL/, use the following statement to rename a table
+#+begin_src sql
+RENAME TABLE
+tb_name1 TO new_tb_name1,
+tb_name2 TO new_tb_name2;
+#+end_src
+
+Or use
+#+begin_src sql
+ALTER TABLE old_tb RENAME new_tb;
+#+end_src
+
+However, ~ALTER TABLE~ can only rename one table at once.
+** ~TRUNCATE~
+** Other Useful Commands
+*** Database Management
+
+| Functions              | Commands                                |
+|------------------------+-----------------------------------------|
+| Show all databases     | =SHOW DATABASES;=                       |
+| Show current databases | =SELECT DATABASE();=                    |
+| Create databases[fn:3] | =CREATE DATABASE [IF NOT EXISTS] name;= |
+| Drop databases         | =DROP DATABASE [IF EXISTS] name;=       |
+| Use/enter databases    | =USE name;=                             |
+
+*** Table Management
+
+| Functions                           | Commands                                               |
+|-------------------------------------+--------------------------------------------------------|
+| Show all tables in current database | =SHOW TABLES;=                                         |
+| Show/describe table's structure     | =DESC table;=                                          |
+| Show create command of one table    | =SHOW CREATE TABLE table;=                             |
+| Create new table[fn:4]              | =CREATE TABLE table (...);=                            |
+| Change table's name                 | =ALTER TABLE table RENAME TO new_table;=               |
+| Drop table                          | =DROP TABLE [IF EXISTS] table;=                        |
+| Drop table and recreate one         | =TRUNCATE TABLE table=                                 |
+| Insert column in table              | =ALTER TABLE table ADD column type;=                   |
+| Change specified column's type      | =ALTER TABLE table MODIFY column new_type;=            |
+| Change specified column             | =ALTER TABLE table CHANGE column new_column new_type;= |
+| Drop column                         | =ALTER TABLE table DROP colum;=                        |
+* Data Manipulation Language
+** ~INSERT~
+*** Insert full row into table
+#+begin_src sql
+INSERT INTO tb
+VALUES(value1, value2, value3, value4);
+#+end_src
+
+The ~VALUES~ must contain all the values in one line.
+*** Insert part of row into table
+#+begin_src sql
+INSERT INTO tb(col1, col2, col3, col4)
+VALUES(value1, value2, value3, value4);
+#+end_src
+
+In this case, the ~VALUES~ can contain a part of the values in one line. And
+other columns' values will be ~NULL~.
+*** Insert the results of ~SELECT~
+#+begin_src sql
+INSERT INTO tb1(col1, col2, col3, col4)
+SELECT col1, col2, col3, col4
+FROM tb2;
+#+end_src
+*** ~SELECT INTO~
+We can use ~SELECT INTO~ statement to copy data from one table to another
+table.
+
+#+begin_src sql
+SELECT * INTO tb2 FROM tb1;
+#+end_src
+
+For /MariaDB/, /MySQL/, /Oracle/, /PostgreSQL/ and /SQLite/, use the following
+instead
+
+#+begin_src sql
+CREATE TABLE new_table AS
+SELECT * FROM tb;
+#+end_src
+
+*Note*: /DB2/ does'nt support ~SELECT INTO~.
+** ~DELECT~
+#+begin_src sql
+DELETE FROM tb
+WHERE condition;
+#+end_src
+
+If you want to delete all the data in one table, use ~TRUNCATE TABLE~ instead.
+** ~UPDATE~
+#+begin_src sql
+UPDATE tb
+SET col1 = value1,
+    col2 = value2
+WHERE condition;
+#+end_src
+
+If there is no condition in this statement, the DBMS will update all the date
+in the table.
+** ~SELECT~
+#+begin_src sql
+SELECT column_1 AS alias_1, column_2 AS alias_2
+FROM your_table;
+#+end_src
+
+This will return two columns of data, ~column_1~ and ~column_2~ sliced from
+~your_table~, and will give them alias respectively: ~column_1~ as ~alias_1~ and
+~column_2~ as ~alias_2~.
+
+*Note*: There is no ~AS~ keyword in /Oracle/.
+
+If you want to get all the columns from the table, use ~*~ instead of the names
+of columns. Such as
+
+#+begin_src sql
+SELECT * FROM your_table;
+#+end_src
+
+~DUAL~ is a one-row, one-column built-in table in SQL. It is used to hold the
+results of a ~SELECT~ statement that are otherwise not stored or used. The
+results in the ~DUAL~ table can also be manipulated per the end-user
+requirements.
+
+The following is the order must to be followed.
+
+1. ~SELECT~
+2. ~FROM~
+3. ~WHERE~
+4. ~GROUP BY~
+5. ~HAVING~
+6. ~ORDER BY~
+
+*** Select Distinct Values
+If you want to select the distinct values in one column, use
+
+#+begin_src sql
+SELECT DISTINCT your_column FROM your_table;
+#+end_src
+
+*Note*: The keyword ~DISTINCT~ will be applied to all columns, that is, if you
+use
+
+#+begin_src sql
+SELECT DISTINCT column_1, column_2 FROM your_table;
+#+end_src
+
+only the columns with the same values of ~column_1~ and ~column_2~ will be
+ignored.
+
+*** Limit the Results
+The result of a query may be too large to read, if you want to restrict the number
+of lines the query returns, use the following methods:
+
+**** SQL Server and Access
+#+begin_src sql
+SELECT TOP 5 your_column
+FROM your_table;
+#+end_src
+
+**** DB2
+#+begin_src sql
+SELECT your_column FROM your_table
+FETCH FIRST 5 ROWS ONLY;
+#+end_src
+
+**** Oracle
+#+begin_src sql
+SELECT your_column FROM your_table
+WHERE ROWNUM <= 5
+#+end_src
+
+**** MySQL, MariaDB, PostgreSQL SQLite...
+#+begin_src sql
+SELECT your_column FROM your_table
+LIMIT 5;
+#+end_src
+
+Also, in these DBMS'es, we can set offset value:
+#+begin_src sql
+SELECT your_column FROM your_table
+LIMIT 5 OFFSET 10;
+#+end_src
+
+Or on MySQL and MariaDB
+#+begin_src sql
+SELECT your_column FROM your_table
+LIMIT 5 10;
+#+end_src
+*** Sort the Results
+To sort the values returned by a query statement, use the keyword ~ORDER BY~:
+
+#+begin_src sql
+SELECT column_1, column_2, column_3
+FROM your_table
+ORDER BY column_1, column_2 DESC;
+#+end_src
+
+This means sort the values by ~column_1~ in ascending order, and *then* by ~column_2~
+in descending order.
+*** Filter the Results by ~WHERE~
+In ~SELECT~ statements, we use ~WHERE~ clause to filter the data and get
+the ones we need.
+
+#+begin_src sql
+SELECT product_name, product_price
+FROM tb_products
+WHERE product_price <= 3.99
+ORDER BY product_price DESC;
+#+end_src
+
+*Note*: the ~ORDER BY~ clause must be after the ~WHERE~ clause.
+
+**** Condition Operators
+| Operator          | Description              |
+|-------------------+--------------------------|
+| ~=~               | equal to                 |
+| ~<>~              | not equal to             |
+| ~!=~              | not equal to             |
+| ~>~               | greater than             |
+| ~>=~              | greater than or equal to |
+| ~<~               | less than                |
+| ~<=~              | less than or equal to    |
+| ~BETWEEN a AND b~ | Omitted                  |
+| ~IS NULL~         | Omitted                  |
+
+There are another operator: ~IN~, this judges that if the values is in the
+given value set.
+
+#+begin_src sql
+SELECT product_name, product_price
+FROM tb_products
+WHERE product_name IN ('Name 1', 'Name 2', 'Name 3')
+ORDER BY product_price DESC;
+#+end_src
+**** Logical Operators
+There are three logical operators: ~AND~, ~OR~ and ~NOT~. Their usage is
+obvious. Note that the priority of ~AND~ is higher than ~OR~.
+*** Filter the Results by ~LIKE~
+In search pattern, the wildcard ~%~ means any charactor appears arbitrarily.
+The wildcard ~_~ means any charactor appears one time.
+
+*Note*: In *Microsoft Access*, use ~*~ instead of ~%~ and ~?~ instead of ~_~.
+DB2 does'nt support the wildcard ~_~.
+
+There is another wildcard, ~[]~, this means the charactor must be one of the
+charactors in ~[]~. For example, find words starting with "A" or "B", use
+pattern ~[AB]%~.
+
+If add a ~^~ in ~[]~, the wildcard will search charactor not
+in ~[]~. For example, find words not starting with "A", "B" and "C", use
+pattern ~[^ABC]%~.
+
+*Note*, In *Microsoft Access*, use ~!~ instead of ~^~.
+*** Calculation Field
+**** Concatenate Field
+To concatenate two columns into one column, use concatenating operator:
+~+~ in /Access/ and /SQL Server/, ~||~ in /DB2/, /Oracle/, /PostgreSQL/,
+/SQLite/ and /Open Office Base/. There is no operator in /MySQL/ and /MariaDB/,
+we have to use some special functions to achieve this.
+
+For example, if we need to concatenate ~country~ and ~enterprise_name~ into one
+field like ~enterprise_name (country)~, use
+
+#+begin_src sql
+SELECT enterprise_name + ' (' + country + ')'
+       AS enterprise_title
+FROM your_table
+ORDER BY enterprise_name;
+#+end_src
+
+Note that all the string field have a few spaces on their right, to remove
+them, use function ~RTRIM()~:
+
+#+begin_src sql
+SELECT RTRIM(enterprise_name) || ' (' + RTRIM(country) || ')'
+       AS enterprise_title
+FROM your_table
+ORDER BY enterprise_name;
+#+end_src
+
+There are also ~LTRIM()~ to remove spaces on left and ~TRIM()~ for both
+sides.
+
+**** Algorithm Calculation
+For example, to calculate the total prise
+
+#+begin_src sql
+SELECT price * amount AS total_prise
+FROM your_table
+ORDER BY total_prise;
+#+end_src
+*** Functions
+**** Text Functions
+| Function                                | Description                                |
+|-----------------------------------------+--------------------------------------------|
+| ~LEFT()~                                | Return charactors on the left of a string  |
+| ~RIGHT()~                               | return charactors on the right of a string |
+| ~LENGTH()~ or ~DATALENGTH()~ or ~LEN()~ | Return the length of a string              |
+| ~LOWER()~ or ~LCASE()~ for /Access/     | Return the lower case of a string          |
+| ~UPPER()~ or ~UCASE()~ for /Access/     | Return the upper case of a string          |
+| ~LTRIM()~                               | Remove spaces on the left of the string    |
+| ~RTRIM()~                               | Remove spaces on the right of the string   |
+| ~TRIM()~                                | Remove spaces on both sides of the string  |
+| ~SOUNDEX()~                             | Return the soundex value of a string       |
+**** Date and Time Functions
+Different DBMS'es have different functions for date and time process. The
+following are functions for /MySQL/ and /Oracle/.
+***** MySQL
+| Function     | Description                                         | Synonyms and other implementations    |
+|--------------+-----------------------------------------------------+---------------------------------------|
+| ~NOW()~      | Return the current date and time                    | ~CURRENT_TIMESTAMP()~, ~LOCAL_TIME()~ |
+| ~CURDATE()~  | Return the current date                             | ~CURRENT_DATE()~                      |
+| ~CURTIME()~  | Return the current time                             | ~CURRENT_TIME()~                      |
+| ~EXTRACT()~  | Extract part of a date                              |                                       |
+| ~DATE()~     | Extract the date part of a date/datetime expression |                                       |
+| ~TIME()~     | Extract the time part of a date/datetime expression |                                       |
+| ~YEAR()~     | Extract the year                                    | ~EXTRACT(YEAR FROM date)~             |
+| ~MONTH()~    | Extract the month                                   | ~EXTRACT(MONTH FROM date)~            |
+| ~WEEK()~     | Extract the week number                             | ~EXTRACT(WEEK FROM date)~             |
+| ~DAY()~      | Extract the day                                     | ~EXTRACT(DAY FROM date)~              |
+| ~HOUR()~     | Extract the hour                                    | ~EXTRACT(HOUR FROM date)~             |
+| ~MINUTE()~   | Extract the minute                                  | ~EXTRACT(MINUTE FROM date)~           |
+| ~SECOND()~   | Extract the second                                  | ~EXTRACT(SECOND FROM date)~           |
+| ~LAST_DAY()~ | Return the last day of the month for the argument   |                                       |
+
+***** Oracle
+| Function         | Description                                                                      |
+|------------------+----------------------------------------------------------------------------------|
+| ~EXTRACT()~      | Extract part of a date                                                           |
+| ~CURRENT_DATE()~ | Return the current date and time in the session time zone                        |
+| ~LAST_DAY()~     | Return the last day of the month for the argument                                |
+| ~TO_DATE~        | Convert a date which is in the character string to a DATE value.                 |
+| ~TO_CHAR()~      | Convert a DATE or an INTERVAL value to a character string in a specified format. |
+**** Aggregate Functions
+| Function  | Description                              |
+|-----------+------------------------------------------|
+| ~AVG()~   | Return the average of one column         |
+| ~COUNT()~ | Return the number of lines of one column |
+| ~MAX()~   | Return the maximum of one column         |
+| ~MIN()~   | Return the minimum of one column         |
+| ~SUM()~   | Return the sum of one column             |
+
+*Note*: All the functions above can use the keyword ~DISTINCT~.
+*** Grouped Data
+**** Create Groups
+To divide data into different groups by some rules, use clause ~GROUP BY~,
+for example
+
+#+begin_src sql
+SELECT company_id, COUNT(*) AS num_products
+FROM tb_products
+GROUP BY company_id;
+#+end_src
+
+this'll return the number of products of different company.
+**** Filter Groups
+To filter the groups we obtain, use clause ~HAVING~, for example
+
+#+begin_src sql
+SELECT company_id, COUNT(*) AS num_products
+FROM tb_products
+GROUP BY company_id
+HAVING COUNT(*) >= 2;
+#+end_src
+
+this'll return the number of products of different company greater than 2.
+
+*Note*: ~WHERE~ is used to filter the data we want, ~HAVING~ is used to
+filter the groups we obtain. ~WHERE~ will be executed before ~GROUP BY~,
+and then, also before ~HAVING~.
+*** ~JOIN~
+**** Cartesian Product
+The following SQL will return Cartesian product of two table
+
+#+begin_src sql
+SELECT tb_1.col1, tb_1.col2, tb_2.col1
+FROM tb_1, tb_2;
+#+end_src
+
+We can use ~WHERE~ clause to filter the results
+#+begin_src sql
+SELECT tb_1.col1, tb_1.col2, tb_2.col1
+FROM tb_1, tb_2
+WHERE tb_1.col1 = tb_2.col1;
+#+end_src
+
+**** ~INNER JOIN~
+We can use ~INNER JOIN~ to obtain the result of [[*Cartesian Product][Cartesian Product]]:
+
+#+begin_src sql
+SELECT tb_1.col1, tb_1.col2, tb_2.col1
+FROM tb_1 INNER JOIN tb_2
+     ON tb_1.col1 = tb_2.col1
+#+end_src
+
+Inner join means get all the data satisfy the condition.
+
+We can also use alias for table, such as
+
+#+begin_src sql
+SELECT t1.col1, t1.col2, t2.col1
+FROM tb_1 AS t1 INNER JOIN tb_2 AS t2
+     ON t1.col1 = t2.col1
+#+end_src
+
+**** Self-Join
+Self-join is a special kind of inner join, for example
+
+#+begin_src sql
+SELECT c1.customer_id, c1.customer_name, c1.customer_contact
+FROM tb_customers AS c1, tb_customers AS c2
+WHERE c1.customer_name = c2.customer_name
+      AND c2.customer_contact = "Jim Jones";
+#+end_src
+
+**** ~OUTER JOIN~
+Sometimes we need data without association with the data in the other table,
+in this case, we use ~OUTER JOIN~
+
+There are three kinds of ~OUTER JOIN~: ~LEFT OUTER JOIN~, ~RIGHT OUTER JOIN~
+and ~FULL OUTER JOIN~.
+
+~LEFT OUTER JOIN~ contains data returned by ~INNER JOIN~ and all the data
+in the table on the left side of the keyword.
+
+#+begin_src sql
+SELECT c.customer_id, o.order_num
+FROM tb_customer AS c LEFT OUTER JOIN tb_order AS o
+     ON c.customer_id = o.customer_id;
+#+end_src
+
+This will return all the customers and their orders and those people without
+any order.
+
+Respectively, ~RIGHT OUTER JOIN~ contains data returned by ~INNER JOIN~ and
+all the data in the table on the right side of the keyword. ~FULL OUTER JOIN~
+returns all the data of both tables and combine them.
+
+*Note*: /Access/, /MariaDB/, /MySQL/, /SQLite/ and /Open Office Base/ don't
+support ~FULL OUTER JOIN~.
+
+We can use ~LEFT JOIN~ instead of ~LEFT OUTER JOIN~ and respectively ~RIGHT JOIN~
+instead of ~RIGHT OUTER JOIN~.
+*** ~UNION~ (Compound Query)
+We can use keyword ~UNION~ to get the union of two query, for example
+
+#+begin_src sql
+SELECT col1, col2, col3
+FROM tb1
+WHERE condition1
+UNION
+SELECT col1, col2, col3
+FROM tb1
+WHERE condition2
+UNION
+SELECT col1, col2, col3
+FROM tb2
+WHERE condition3;
+#+end_src
+
+~UNION~ will automatically replace duplacated data, if you want to keep them,
+use ~UNION ALL~ instead of ~UNION~.
+
+There can be one ~ORDER BY~ clause at the end of ~UNION~ to sort the data.
+* Data Control Language
+Some DCL Commands:
+- ~COMMIT~
+- ~ROLLBACK~
+- ~SAVEPOINT~
+- ~GRANT~
+- ~REVOKE~
+
+* Footnotes
+
+[fn:1] [[https://dev.mysql.com/doc/refman/8.0/en/precision-math-decimal-characteristics.html][More Info]]
+
+[fn:2] Timestamps range from 1970-01-01 00:00:01 to 2038-01-19 03:14:17.
+
+[fn:3] The full command is =CREATE DATABASE [IF NOT EXISTS] NAME
+[DEFAULT CHARSET] [COLLATE];=
+
+[fn:4] The full command is
+#+begin_src sql
+CREATE TABLE name(
+column1 datatype [COMMENT ...],
+column2 datatype [COMMENT ...],
+...
+column_n datatype [COMMENT ...]
+) [COMMENT ...];
+#+end_src

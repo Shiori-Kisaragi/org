@@ -1,0 +1,125 @@
+#+title: R
+#+startup: show2levels
+
+* Table of Content :toc:
+- [[#data-basics][Data Basics]]
+  - [[#data-frame][Data Frame]]
+  - [[#tibbles][Tibbles]]
+  - [[#data-types][Data Types]]
+  - [[#filter-observations][Filter Observations]]
+  - [[#create-new-variables][Create New Variables]]
+- [[#others][Others]]
+  - [[#help][Help]]
+
+* Data Basics
+** Data Frame
+A data frame is a rectangular collection of values, usually organized so
+that variables appear in the columns and observations appear in rows.
+
+** Tibbles
+Tibbles are a data frames with some extra properties. It shows only the first
+few rows of the data frame and only the columns that fit on one screen.
+
+Tibble prints abbreviations describe the /type/ of data that is stored in
+each column of it.
+
+** Data Types
+| Abbreviation | Type                            |
+|--------------+---------------------------------|
+| =int=        | integers                        |
+| =dbl=        | doubles                         |
+| =chr=        | strings                         |
+| =dttm=       | date+time                       |
+| =lgl=        | logical (boolean)               |
+| =fctr=       | factors (fixed possible values) |
+| =date=       | dates                           |
+
+** Filter Observations
+*** Filter Rows
+=filter()= lets us use a logical test to extract specific rows from a data
+frame. To use it, pass it the data frame followed by one or more logical
+tests, for example:
+
+#+begin_src R
+filter(data.frame, test.1, test.2, test.3)
+#+end_src
+
+This return a new data frame *that doesn't overwrite the old one*, and it
+contains data from =data.frame= that satisfy *all the test*.
+
+*** Boolean Operators
+For =test.1= and =test.2=, there are three operators:
+
+| Operator | Meaning    |
+|----------+------------|
+| =&=      | and        |
+| =\vert=      | or         |
+| =!=      | not        |
+| =xor=    | exactly or |
+
+*Note*: It's wrong to write =filter(data.frame test.1 == x | y)= to get
+the data whose =test.1= is equal to =x= or =y=, there are two ways to do
+it correctly:
+
+#+begin_src R
+filter(data.frame, test.1 == x | test.2 == y)
+#OR
+filter(data.frame, test.1 %in% c(x, y))
+#+end_src
+
+In the secend method, we use operator =%in%= to get whether the variable
+=test.1= is in the following vector =c(x, y)=.
+
+*** Missing Values (NA)
+R use =NA= to represent missing or *unknown* values. As it's unknown, the
+following expressions are all =NA=:
+
+#+begin_src R
+NA > 5
+10 == NA
+NA + 10
+NA / 2
+NA == NA
+#+end_src
+
+Use =is.na(value)= to determine if a value is missing.
+
+*Notice*:
+#+begin_src R
+NA ^ 0 # = 1
+NA | TRUE # = TRUE
+NA & FALSE # = FALSE
+NA * 0 # = NA
+#+end_src
+
+** Create New Variables
+*** =select()=
+Select a subset of variables by name with the =select()= function, for
+example:
+
+#+begin_src R
+data.frame.new <- select(data.frame.old, column.1, column.2, column.3)
+#+end_src
+
+*** =mutate()=
+Use function =mutate()= to generate and then append new columns, such as:
+
+#+begin_src R
+mutate(file.name,
+       column.new.1 = column.1 - column.2,
+       column.new.2 = column.1 + column.2
+       )
+#+end_src
+
+*** =transmute()=
+However, unlike =mutate()= will return the new columns appended to a copy
+of the original data, the function =transmute()= will only return the new
+columns.
+
+* Others
+** Help
+Open a help page for any object coming with R or with R package by typing a
+=?= before the object's name and then run the command.
+
+Notice that objects created by you or your colleagues will not have a help
+page (unless you make one).
