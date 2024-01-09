@@ -20,6 +20,12 @@
   - [[#update][~UPDATE~]]
   - [[#select][~SELECT~]]
 - [[#data-control-language][Data Control Language]]
+- [[#others][Others]]
+  - [[#execute][~EXECUTE~]]
+- [[#useful-functions][Useful Functions]]
+  - [[#decode][~DECODE()~]]
+  - [[#nvl-or-ifnull][~NVL()~ or ~IFNULL()~]]
+  - [[#substr-family][~SUBSTR()~ Family]]
 - [[#footnotes][Footnotes]]
 
 * Install MySQL
@@ -86,12 +92,12 @@ sudo service mysql restart
 
 * Structured Query Language (SQL)
 ** Basic
-1. All sentences are end with =;=, break long sentences into multi lines to
+1. All sentences are end with ~;~, break long sentences into multi lines to
 increase the readabilities.
 1. SQL is not case-sensitive, up-casing all keyword is recommend.
 2. Comments:
-   - Single line comments: =-- Comments= or =# Comments=;
-   - Multi line comments: =/* Comments */=.
+   - Single line comments: ~-- Comments~ or ~# Comments~;
+   - Multi line comments: ~/* Comments */~.
 ** Data Types
 *** Numeric
 
@@ -135,6 +141,7 @@ increase the readabilities.
 * Data Definition Language
 Some DDL Commands:
 ** ~CREATE~
+*** Table
 The following statement demand SQL to create a new table with specified columns.
 
 #+begin_src sql
@@ -156,6 +163,68 @@ The field ~value_type~ specifies the type of value, here are some types
 The field ~NOT NULL~ or ~NULL~ specifies whether the column can be ~NULL~ or
 not, and the field ~DEFAULT default_value~ specifies the default value of the
 column.
+*** View
+To create a view, use statement
+#+begin_src sql
+CREATE VIEW vw_name AS
+SELECT select_statements;
+#+end_src
+*** Stored Procedure
+**** /Oracle/
+#+begin_src sql
+CREATE PROCEDURE YourStoredProcedure (
+param1 NUMBER
+)
+AS -- Or IS
+/* declare variable here */
+BEGIN
+    /* SQL statements */
+END;
+#+end_src
+
+The parameters can be declared as ~IN~, ~OUT~ or ~INOUT~, shows that whether
+they are input parameter or output return value.
+
+Keyword ~IS~ will be used, when the stored procedure in /Oracle/ is
+nested into some other blocks. If the procedure is standalone then ~AS~
+will be used. Other than this coding standard, both have the same meaning.
+
+For example, a procedure returns the number of the rows in a table
+#+begin_src sql
+CREATE PROCEDURE ListCount (
+    list_count OUT INTEGER)
+IS
+v_rows INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO v_rows
+    FROM tb
+    list_count := v_rows;
+END;
+#+end_src
+
+Usage:
+#+begin_src sql
+var ReturnValue NUMBER
+EXEC ListCount (:ReturnValue);
+SELECT ReturnValue;
+#+end_src
+
+**** /MySQL/
+#+begin_src sql
+CREATE PROCEDURE ListCount (
+    OUT list_count INT)
+BEGIN
+    SELECT COUNT(*) INTO list_count
+    FROM tb
+END;
+#+end_src
+
+Usage:
+#+begin_src sql
+CALL ListCount(@ReturnValue);
+SELECT @ReturnValue;
+#+end_src
+
 ** ~ALTER~
 In ideal situation, we'll never use ~ALTER~ statements to alter the stucture
 of a table. We should fully consider future needs in the design process of
@@ -173,8 +242,13 @@ ALTER TABLE tb_name
 DROP COLUMN col_name;
 #+end_src
 ** ~DROP~
+*** Table
 #+begin_src sql
 DROP TABLE tb_name;
+#+end_src
+*** View
+#+begin_src sql
+DROP VIEW vw_name;
 #+end_src
 
 ** ~RENAME~
@@ -647,7 +721,62 @@ Some DCL Commands:
 - ~SAVEPOINT~
 - ~GRANT~
 - ~REVOKE~
+* Others
+** ~EXECUTE~
+To execute a stored procedure, use statement
+#+begin_src sql
+EXEC YourStoredProcedure(
+        value1,
+        value2,
+        value3
+);
+#+end_src
 
+To create a stored procedure, use [[*Stored Procedure][Stored Procedure]].
+
+* Useful Functions
+** ~DECODE()~
+#+begin_src sql
+DECODE(expr, search1, result1, search2, result2, [default])
+#+end_src
+
+~DECODE~ compares ~expr~ to each ~search~ value one by one. If ~expr~ is
+equal to a ~search~, then Oracle Database returns the corresponding ~result~.
+If no match is found, then Oracle returns ~default~. If ~default~ is omitted,
+then Oracle returns ~null~.
+** ~NVL()~ or ~IFNULL()~
+Function ~NVL()~ is for /Oracle/, and ~IFNULL~ is for /MySQL/ and /SQL Server/.
+#+begin_src sql
+/* In Oracle */
+NVL(expr, return_value)
+
+/* Or in MySQL */
+IFNULL(expr, return_value)
+#+end_src
+The function lets you replace ~null~ (returned as a blank) with a string in
+the results of a query. If ~expr~ is null, then the function returns ~return_value~.
+If ~expr~ is not ~null~, returns ~expr~.
+** ~SUBSTR()~ Family
+#+begin_src sql
+SUBSTR(char, position, substring_length)
+#+end_src
+The ~SUBSTR~ functions return a portion of char, beginning at character
+~position~, ~substring_length~ characters long. ~SUBSTR~ calculates lengths using
+characters as defined by the input character set:
+
+- SUBSTRB uses bytes instead of characters
+- SUBSTRC uses Unicode complete characters
+- SUBSTR2 uses UCS2 code points
+- SUBSTR4 uses UCS4 code points
+
+Here are some other rules:
+
+- If ~position~ is ~0~, then it is treated as ~1~.
+- If ~position~ is positive, then /Oracle Database/ counts from the beginning
+  of char to find the first character.
+- If ~position~ is negative, then /Oracle/ counts backward from the end of char.
+- If ~substring_length~ is omitted, then /Oracle/ returns all characters to the
+  end of char. If ~substring_length~ is less than ~1~, then Oracle returns ~null~.
 * Footnotes
 
 [fn:1] [[https://dev.mysql.com/doc/refman/8.0/en/precision-math-decimal-characteristics.html][More Info]]
