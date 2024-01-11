@@ -207,7 +207,7 @@ the syntax ~kill -TERM <PID>~.
 
 ** Pausing and Backgrouding Processes
 ~SIGSTOP~ pauses a process. In the terminal, typing ~Ctrl-Z~ will prompt
-the shell to send a ~SIGTSTP~ signal, short for Terminal Stop (the terminal's
+the shell to send a ~SIGSTOP~ signal, short for Terminal Stop (the terminal's
 version of ~SIGSTOP~).
 
 We can then continue the paused job in the foreground or in the background
