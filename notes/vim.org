@@ -1,0 +1,76 @@
+#+title: Vim
+#+startup: show2levels
+
+* Normal Mode
+** Movement
+The simplest way to move is via the ~hjkl~ keys.
+
+~%~ let the cursor goto the matched character.
+*** Word
+A *word* is a sequence of alphanumeric characters. A *Word* is a sequence
+of non-whitespace characters. The ~wbe~ keys move the cursor around words.
+The ~WBE~ keys move the cursor around Words.
+
+| Key         | Function                                       |
+|-------------+------------------------------------------------|
+| ~w~ and ~W~ | moves the cursor forward to the next start of a word/Word |
+| ~b~ and ~B~ | moves the cursor backward to the next start of a word/Word |
+| ~e~ and ~E~ | moves the cursor forward to the next end of a word/Word   |
+
+*** In Line
+| Key | Function                                                                 |
+|-----+--------------------------------------------------------------------------|
+| ~0~ | moves the cursor to the beginning of the line                            |
+| ~^~ | moves the cursor to the beginning of the line, excluding whitespace      |
+| ~+~ | moves the cursor to the beginning of the next line, excluding whitespace |
+| ~$~ | moves the cursor to the end of the line                                  |
+
+*** Find Character
+| Key       | Function                                            |
+|-----------+-----------------------------------------------------|
+| ~f<char>~ | moves forward to next ~char~ in this line           |
+| ~F<char>~ | moves backward to next ~char~ in this line          |
+| ~t<char>~ | moves forward until next ~char~ in this line        |
+| ~T<char>~ | moves backward until next ~char~ in this line       |
+| ~;~       | repeats the previous ~fFtT~ command                 |
+| ~,~       | repeats the previous ~fFtT~ command except reversed |
+*** Search pattern
+| Key | Function                                    |
+|-----+---------------------------------------------|
+| ~/~ | initiates a search                          |
+| ~?~ | initiates a backwards search                |
+| ~n~ | repeats the previous search                 |
+| ~N~ | repeats the previous search except reversed |
+
+*** Identifier
+A *identifier* can be considered the same *Word* as where the cursor at. Use
+~#~ and ~*~ move forward and backward to the next identifier.
+
+*** Sentense
+The ~()~ characters move forward and backward one sentence.
+*** Paragraph
+A sequence of nonempty lines is called a *paragraph*.
+
+Use ~{~ and ~}~ to move forward and backward by paragraphs.
+*** Viewing Window
+| Key   | Function                                                      |
+| ~H~   | moves the cursor the the start of the first visible line      |
+| ~M~   | moves the cursor the the start of the middle visible line     |
+| ~L~   | moves the cursor the the start of the last visible line       |
+| ~C-e~ | moves the viewing window down one visual line                 |
+| ~C-y~ | moves the viewing window up one visual line                   |
+| ~C-f~ | moves the viewing window forward by one viewing window        |
+| ~C-b~ | moves the viewing window backward by one viewing window       |
+| ~C-d~ | moves the viewing window down by half of one viewing window   |
+| ~C-u~ | moves the viewing window up by half of one viewing window     |
+| ~zz~  | moves the viewing window to position the cursor in the middle |
+| ~zt~  | moves the viewing window to position the cursor at the top    |
+| ~zb~  | moves the viewing window to position the cursor at the bottom |
+** Mark
+| Key       | Function                                             |
+|-----------+------------------------------------------------------|
+| ~m<a-z>~  | create a buffer-specific mark                        |
+| ~m<A-Z>~  | create a global mark                                 |
+| ~'<mark>~ | jump to the beginning of the line with mark ~<mark>~ |
+| ~`<mark>~ | jump to mark ~<mark>~                                |
+| ~''~      | jump to last jump point                              |

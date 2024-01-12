@@ -41,16 +41,16 @@ increase the readabilities.
 ** Data Types
 *** Numeric
 
-| Type      | Storage (byte) |
-|-----------+----------------|
-| TINYINT   |              1 |
-| SMALLINT  |              2 |
-| MEDIUMINT |              3 |
-| INT       |              4 |
-| BIGINT    |              8 |
-| FLOAT     |              4 |
-| DOUBLE    |              8 |
-| DECIMAL[fn:1] | ~              |
+| Type          | Storage (byte) |
+|---------------+----------------|
+| TINYINT       |              1 |
+| SMALLINT      |              2 |
+| MEDIUMINT     |              3 |
+| INT           |              4 |
+| BIGINT        |              8 |
+| FLOAT         |              4 |
+| DOUBLE        |              8 |
+| DECIMAL[fn:1] |              ~ |
 
 *Note*: Declare a non-negative number, such as non-negative int:
 =INT UNSIGNED=
@@ -80,7 +80,7 @@ increase the readabilities.
 
 * Data Definition Language
 ** ~CREATE~
-*** Create Table :Table:
+*** Create Table
 The following statement demand SQL to create a new table with specified columns.
 
 #+begin_src sql
@@ -105,7 +105,7 @@ The field ~value_type~ specifies the type of value, here are some types
 The field ~NOT NULL~ or ~NULL~ specifies whether the column can be ~NULL~ or
 not, and the field ~DEFAULT default_value~ specifies the default value of the
 column.
-*** Identity Columns :Column:
+*** Identity Columns
 The identity column is very useful for the surrogate primary key column.
 When you insert a new row into the identity column, /Oracle/ auto-generates
 and insert a sequential value into the column.
@@ -147,7 +147,7 @@ CREATE TABLE tb_name
     PRIMARY KEY (col1)
 );
 #+end_src
-*** ~CREATE TABLE AS SELECT~ :Table:
+*** ~CREATE TABLE AS SELECT
 We can use ~CREATE TABLE AS SELECT~ statement to copy data from one table to another
 table.
 
@@ -156,13 +156,13 @@ CREATE TABLE new_table AS
 SELECT * FROM tb;
 #+end_src
 
-*** Create View :View:
+*** Create View
 To create a view, use statement
 #+begin_src sql
 CREATE VIEW vw_name AS
 SELECT select_statements;
 #+end_src
-*** Create Stored Procedure :Procedure:
+*** Create Stored Procedure
 **** /Oracle/
 #+begin_src sql
 CREATE PROCEDURE YourStoredProcedure (
@@ -217,7 +217,37 @@ Usage:
 CALL ListCount(@ReturnValue);
 SELECT @ReturnValue;
 #+end_src
+*** Temporary Table
+**** Global Temporary Table
+A temporary table is a table that holds data only for the duration of a
+session or transaction.
 
+Global temporary tables in Oracle are permanent database objects that
+store data on disk and are *visible* to all sessions.
+
+However, the data stored in the global temporary table is *private* to the
+session. In other words, each session can only access its own data in the
+global temporary tabel.
+
+***** Create Global Temporary Tables
+#+begin_src sql
+CREATE GLOBAL TEMPORARY TABLE table_name (
+    column_definition,
+    ...,
+    table_constraints
+) ON COMMIT [DELETE ROWS | PRESERVE ROWS];
+#+end_src
+
+The ~ON COMMIT~ clause specifies whether data in the table is
+transaction-specific or session-specific:
+
+- The ~ON COMMIT DELETE ROWS~ clause specifies that the global
+  temporary table is transaction-specific. It means that /Oracle/
+  truncates the table (remove all rows) after each commit.
+- The ~ON COMMIT PRESERVE ROWS~ clause specifies that the global
+  temporary table is session-specific, meaning that ~Oracle~ truncates
+  the table when you terminate the session, not when you commit a
+  transaction.
 ** ~ALTER~
 In ideal situation, we'll never use ~ALTER~ statements to alter the stucture
 of a table. We should fully consider future needs in the design process of
