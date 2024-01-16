@@ -74,3 +74,18 @@ Use ~{~ and ~}~ to move forward and backward by paragraphs.
 | ~'<mark>~ | jump to the beginning of the line with mark ~<mark>~ |
 | ~`<mark>~ | jump to mark ~<mark>~                                |
 | ~''~      | jump to last jump point                              |
+
+** Macro
+To record a macro, type the key ~q~ followed by a character as a register in
+normal mode, followed by all command you want to record and the type the key
+~q~ again to finish the recording.
+
+#+begin_src
+q<register><command>q
+#+end_src
+
+To obtain what macros are in the Vim registers, use ~:register~ or ~:reg~ or
+~:reg <register>~ to specify a register
+
+One of the ways to use macros is select it in Vim registers. A more convenient
+method is ~@<rigster>~. Once a macro is executed, use ~@@~ to execute it again.
