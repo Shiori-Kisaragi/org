@@ -1,0 +1,84 @@
+#+title: Information And Entropy
+#+startup: show2levels
+
+* Information and Thermodynamics
+- First Law of Thermodynamics :: energy cannot be created or destroyed, but it
+   can be transformed from one form to another.
+- Second Law of Thermodynamics :: heat always flows spontaneously from hotter to
+  colder region of matter.
+
+* Bits
+** Amount of Information
+Information is measured in bits. Bits are simple, having only two possible values:
+$0$ and $1$.
+
+In information theory, by convention, we always name the person telling the
+outcome /Alice/ and the person hearing the outcome /Bob/.
+
+The outcome of experiment with 2 result (like flipping a coin) could be conveyed
+with 1 bit, thus the amount of information is the logarithm to the base 2 of the
+number of equally likely outcomes.
+
+** Two Phases of Conveying Information
+- *Setup* phase (or *the code*) :: in which Alice and Bob agree on what they will
+  communicate about, and exactly what each sequence means.
+- *Outcome* phase (or *the data*) :: where actual sequence of $0$ and $1$ representing
+  the outcomes are sent.
+
+After Bob knows that an experiment is conducted but before receiving Alice's
+message, he's uncertain about the result. His uncertainty, or lack of
+information, can be expressed in bits. Upon hearing the result, his uncertainty
+is reduced by the information he receives
+
+Bob's uncertainty rises during the setup phase and then is reduced during the
+outcome phase.
+
+** Some Properties of Information
+- Information can *be learned* through observation, expriment and measurement.
+- Information is *subjective*, or "observer-dependent". What Alice knows is
+  different from what Bob knows.
+- A person's *uncertainty* can be increased upon learning that there is an
+  observation about which information may be available, and then can be reduced
+  by receiving that information.
+- Information can be *lost*, either through loss of the data itself, or through
+  loss of the code.
+- The physical form of information is localized in space and time, as a consequence,
+  - Information can be sent from one place to another;
+  - Information can be stored and then retrieved later.
+
+** The Boolean Bit and Boolean Function
+The Boolean function receives parameters and returns values.
+
+First consider Boolean function of a single variable that returns a single value.
+There are 2 possible arguments and 2 possible output, thus there are 4 possible
+different functions.
+
+| $x$ | IDENTITY | NOT | ZERO | ONE |
+|-----+----------+-----+------+-----|
+|   0 |        0 |   1 |    0 |   1 |
+|   1 |        1 |   0 |    0 |   1 |
+
+Next, consider Boolean function of 2 input variables $A$ and $B$ and one output
+value $C$. There are 4 possible input combinations and 2 possible output values,
+thus there are $2^4 = 16$ different Boolean functions. The following are the
+most useful 5 functions
+
+| $AB$ | $AND$ | $NAND$ | $OR$ | $NOR$ | $XOR$ |
+|------+-------+--------+------+-------+-------|
+|   00 |     0 |      1 |    0 |     1 |     0 |
+|   01 |     0 |      1 |    1 |     0 |     1 |
+|   10 |     0 |      1 |    1 |     0 |     1 |
+|   11 |     1 |      0 |    1 |     0 |     0 |
+
+- $NOT$ :: $\bar{A}$
+- $AND$ :: $A \dot B$
+- $NAND$ :: $\bar{A \dot B}$, not and
+- $OR$ :: $A + B$
+- $NOR$ :: $\bar{A + B}$, not or
+- $XOR$ :: $A \oplus B$, exclusive or
+** The Circuit Bit
+Combinational logic circuits are a way to represent Boolean expressions
+graphically. Note that Boolean algebra is not sufficent to describe sequential
+logic, i.e., circuits with loops.
+
+* Codes
